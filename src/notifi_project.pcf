@@ -1,0 +1,38 @@
+# ===============================
+#       Clock (12 MHz)
+# ===============================
+set_io -nowarn clk      35
+set_io -nowarn rst_n    10
+
+# ===============================
+# PMOD1A: Leds
+# ===============================
+set_io -nowarn leds[0]   4
+set_io -nowarn leds[1]   2
+set_io -nowarn leds[2]   47
+set_io -nowarn leds[3]   45
+set_io -nowarn leds[4]   3
+set_io -nowarn leds[5]   48
+set_io -nowarn leds[6]   46
+set_io -nowarn leds[7]    44
+
+# ===============================
+# PMOD1B: Leds + Buzzers + Servo
+# ===============================
+
+#Leds
+set_io -nowarn leds[8]    43
+
+# servo
+set_io -nowarn servo_pwm   31
+
+# Buzzers
+set_io -nowarn buzzer1         42
+set_io -nowarn buzzer2         36
+
+#===================================
+# PMOD2: UART (Connection to ESP32)
+#===================================
+
+set_io -nowarn msg_in  27
+set_io -nowarn call_in  25
