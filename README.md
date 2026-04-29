@@ -11,10 +11,10 @@ A real-time hardware-software integration project that bridges an ESP32 microcon
 ## Physical Integration & Pinout
 | Function | ESP32 Pin | FPGA Pin (IceBreaker) | Description |
 | :--- | :--- | :--- | :--- |
-| **Message Trigger** | GPIO 16 | Pin 27 | Goes HIGH for 2.5s on incoming message |
-| **Call Trigger** | GPIO 4 | Pin 25 | Goes HIGH for 10s on incoming call |
-| **Servo PWM** | N/A | Pin 31 | Custom PWM generation |
-| **Buzzers (x2)** | N/A | Pins 42, 36 | ~3kHz tone generation |
+| **Message Trigger** | GPIO 16 | Pin 27 | Goes HIGH for 1.33s on incoming message |
+| **Call Trigger** | GPIO 4 | Pin 25 | Goes HIGH for 10s on incoming call or until the call answered |
+| **Servo PWM** | N/A | Pin 31 | Custom 50Hz PWM generation |
+| **Buzzers (x2)** | N/A | Pins 42, 36 | 3kHz tone generation |
 | **LED Array (x9)**| N/A | PMOD1A / PMOD1B | State-dependent visual patterns |
 | **Common GND** | GND | GND | Essential for signal integrity |
 
