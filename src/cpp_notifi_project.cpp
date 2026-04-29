@@ -148,7 +148,7 @@ void loop() {
     
     display.display();
     
-    if (millis() - messageStartTime >= 2500) {
+    if (millis() - messageStartTime >= 1333) {
       currentState = IDLE;
       digitalWrite(MSG_PIN, LOW);
       digitalWrite(CALL_PIN, LOW);
