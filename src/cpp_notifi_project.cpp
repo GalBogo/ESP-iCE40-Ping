@@ -13,8 +13,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define MSG_PIN 16
 #define CALL_PIN 4
 
-const char* ssid = "Gal_Dana 2.4"; 
-const char* password = "207152901s";
+const char* ssid = "***"; 
+const char* password = "******";
 
 WebServer server(80);
 
