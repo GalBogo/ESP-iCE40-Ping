@@ -4,6 +4,8 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "soc/gpio_struct.h"
+#include "soc/gpio_reg.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -13,7 +15,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define MSG_PIN 16
 #define CALL_PIN 4
 
-const char* ssid = "***"; 
+const char* ssid = "***";
 const char* password = "******";
 
 WebServer server(80);
@@ -40,9 +42,9 @@ void handleMessage() {
   if (server.hasArg("text")) {
     currentText = cleanString(server.arg("text"));
     currentState = MESSAGE;
-    digitalWrite(MSG_PIN, HIGH);
-    digitalWrite(CALL_PIN, LOW);
-    messageStartTime = millis(); 
+    GPIO.out_w1ts.val = (1 << MSG_PIN);
+    GPIO.out_w1tc.val = (1 << CALL_PIN);
+    messageStartTime = millis();
     server.send(200, "text/plain", "OK");
   } else {
     server.send(400, "text/plain", "Bad Request");
@@ -53,8 +55,8 @@ void handleCall() {
   if (server.hasArg("name")) {
     currentText = cleanString(server.arg("name"));
     currentState = CALL;
-    digitalWrite(CALL_PIN, HIGH);
-    digitalWrite(MSG_PIN, LOW);
+    GPIO.out_w1ts.val = (1 << CALL_PIN);
+    GPIO.out_w1tc.val = (1 << MSG_PIN);
     callStartTime = millis();
     server.send(200, "text/plain", "OK");
   } else {
@@ -63,24 +65,21 @@ void handleCall() {
 }
 
 void handleIdle() {
-  currentState = IDLE; 
-  digitalWrite(MSG_PIN, LOW);
-  digitalWrite(CALL_PIN, LOW);
+  currentState = IDLE;
+  GPIO.out_w1tc.val = (1 << MSG_PIN) | (1 << CALL_PIN);
   server.send(200, "text/plain", "OK");
 }
 
 void setup() {
   Serial.begin(115200);
-  
-  pinMode(MSG_PIN, OUTPUT);
-  pinMode(CALL_PIN, OUTPUT);
-  digitalWrite(MSG_PIN, LOW);
-  digitalWrite(CALL_PIN, LOW);
+
+  REG_WRITE(GPIO_ENABLE_W1TS_REG, (1 << MSG_PIN) | (1 << CALL_PIN));
+  GPIO.out_w1tc.val = (1 << MSG_PIN) | (1 << CALL_PIN);
 
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     for(;;);
   }
-  
+
   display.clearDisplay();
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
@@ -109,19 +108,18 @@ void setup() {
 
 void drawEyes() {
   display.clearDisplay();
-  
+
   if (millis() - lastBlinkTime > (isBlinking ? 200 : 3000)) {
     isBlinking = !isBlinking;
     lastBlinkTime = millis();
   }
-  
+
   if (isBlinking) {
     display.fillRect(20, 30, 28, 4, SSD1306_WHITE);
     display.fillRect(80, 30, 28, 4, SSD1306_WHITE);
   } else {
     display.drawRoundRect(20, 16, 28, 28, 6, SSD1306_WHITE);
     display.drawRoundRect(80, 16, 28, 28, 6, SSD1306_WHITE);
-    
     display.fillRect(28, 24, 12, 12, SSD1306_WHITE);
     display.fillRect(88, 24, 12, 12, SSD1306_WHITE);
   }
@@ -130,28 +128,27 @@ void drawEyes() {
 
 void loop() {
   server.handleClient();
-  
+
   if (currentState == IDLE) {
     drawEyes();
-  } 
+  }
   else if (currentState == MESSAGE) {
     display.clearDisplay();
     display.setCursor(0, 0);
-    
+
     int colonIndex = currentText.indexOf(':');
     if (colonIndex != -1) {
-      display.println(currentText.substring(0, colonIndex + 1)); 
-      display.println(currentText.substring(colonIndex + 1));    
+      display.println(currentText.substring(0, colonIndex + 1));
+      display.println(currentText.substring(colonIndex + 1));
     } else {
-      display.println(currentText); 
+      display.println(currentText);
     }
-    
+
     display.display();
-    
+
     if (millis() - messageStartTime >= 1333) {
       currentState = IDLE;
-      digitalWrite(MSG_PIN, LOW);
-      digitalWrite(CALL_PIN, LOW);
+      GPIO.out_w1tc.val = (1 << MSG_PIN) | (1 << CALL_PIN);
     }
   }
   else if (currentState == CALL) {
@@ -161,13 +158,12 @@ void loop() {
     display.println();
     display.println(currentText);
     display.display();
-    
+
     if (millis() - callStartTime >= 10000) {
       currentState = IDLE;
-      digitalWrite(CALL_PIN, LOW);
-      digitalWrite(MSG_PIN, LOW);
+      GPIO.out_w1tc.val = (1 << CALL_PIN) | (1 << MSG_PIN);
     }
   }
-  
+
   delay(10);
-  }
+}
